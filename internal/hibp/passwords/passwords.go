@@ -24,8 +24,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
-	"go.felesatra.moe/go2/errors"
 )
 
 const rangeURL = `https://api.pwnedpasswords.com/range/`
@@ -52,7 +50,7 @@ func Range(c Client, hash string) ([]Match, error) {
 	hash = strings.ToUpper(hash[:rangePrefixLength])
 	resp, err := c.Get(rangeURL + hash)
 	if err != nil {
-		return nil, errors.Wrapf(err, "passwords range %s", hash)
+		return nil, fmt.Errorf("passwords range %s: %w", hash, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
@@ -60,7 +58,7 @@ func Range(c Client, hash string) ([]Match, error) {
 	}
 	m, err := parseRangeResponse(resp.Body)
 	if err != nil {
-		return nil, errors.Wrapf(err, "passwords range %s", hash)
+		return nil, fmt.Errorf("passwords range %s: %w", hash, err)
 	}
 	for i := range m {
 		m[i].Digest = hash + m[i].Digest
